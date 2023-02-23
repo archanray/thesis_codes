@@ -185,12 +185,16 @@ images.append(imageio.imread(file3))
 # plt.imshow(img)
 # plt.show()
 le = 15
-for i in range(le):
+for i in tqdm(range(le)):
         images.append(fadeout(file1, file2, 1-1/(i+1)))
 
 images.append(imageio.imread(file2))
 for _ in range(4):
     images.append(imageio.imread("figures/general_plots/sample_random_matrix.png"))
+
+for i in tqdm(range(le,-1,-1)):
+    images.append(images[i])
+
 imageio.mimsave('figures/general_plots/sublinear_sampler.gif', images)
 
 ######################################################################################
