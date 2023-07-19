@@ -149,53 +149,53 @@ from tqdm import tqdm
 
 ######################################################################################
 
-# make GIF
-def fadeout(fl1, fl2, factor):
-        white = np.array([255,255,255,255], np.uint8)
-        img1 = Image.open(fl2)
-        img1 = img1.convert("RGBA")
-        datas1 = img1.getdata()
+# # make GIF
+# def fadeout(fl1, fl2, factor):
+#         white = np.array([255,255,255,255], np.uint8)
+#         img1 = Image.open(fl2)
+#         img1 = img1.convert("RGBA")
+#         datas1 = img1.getdata()
 
-        img2 = Image.open(fl1)
-        img2 = img2.convert("RGBA")
-        datas2 = img2.getdata()
-        newData = []
-        for i in range(len(datas1)):
-            item1 = datas1[i]
-            item2 = datas2[i]
-            if item1[0] == 255 and item1[1] == 255 and item1[2] == 255:
-                item2 = np.array(list(item2))
-                vector = white - item2
-                value = item2 + vector*factor
-                value = value.astype(np.uint8)
-                item2 = tuple(list(value))
-                newData.append(item2)
-            else: 
-                newData.append(item1)
-        img1.putdata(newData)
-        return img1
+#         img2 = Image.open(fl1)
+#         img2 = img2.convert("RGBA")
+#         datas2 = img2.getdata()
+#         newData = []
+#         for i in range(len(datas1)):
+#             item1 = datas1[i]
+#             item2 = datas2[i]
+#             if item1[0] == 255 and item1[1] == 255 and item1[2] == 255:
+#                 item2 = np.array(list(item2))
+#                 vector = white - item2
+#                 value = item2 + vector*factor
+#                 value = value.astype(np.uint8)
+#                 item2 = tuple(list(value))
+#                 newData.append(item2)
+#             else: 
+#                 newData.append(item1)
+#         img1.putdata(newData)
+#         return img1
     
 
-images = []
-file1 = "figures/general_plots/random_matrix.png"
-file2 = "figures/general_plots/sample_random_matrix.png"
-file3 = "figures/general_plots/base_matrix.png"
-images.append(imageio.imread(file3))
-# img = fadeout(file1, file2, 1/5)
-# plt.imshow(img)
-# plt.show()
-le = 15
-for i in tqdm(range(le)):
-        images.append(fadeout(file1, file2, 1-1/(i+1)))
+# images = []
+# file1 = "figures/general_plots/random_matrix.png"
+# file2 = "figures/general_plots/sample_random_matrix.png"
+# file3 = "figures/general_plots/base_matrix.png"
+# images.append(imageio.imread(file3))
+# # img = fadeout(file1, file2, 1/5)
+# # plt.imshow(img)
+# # plt.show()
+# le = 15
+# for i in tqdm(range(le)):
+#         images.append(fadeout(file1, file2, 1-1/(i+1)))
 
-images.append(imageio.imread(file2))
-for _ in range(4):
-    images.append(imageio.imread("figures/general_plots/sample_random_matrix.png"))
+# images.append(imageio.imread(file2))
+# for _ in range(4):
+#     images.append(imageio.imread("figures/general_plots/sample_random_matrix.png"))
 
-for i in tqdm(range(le,-1,-1)):
-    images.append(images[i])
+# for i in tqdm(range(le,-1,-1)):
+#     images.append(images[i])
 
-imageio.mimsave('figures/general_plots/sublinear_sampler.gif', images)
+# imageio.mimsave('figures/general_plots/sublinear_sampler.gif', images)
 
 ######################################################################################
 
@@ -324,3 +324,31 @@ imageio.mimsave('figures/general_plots/sublinear_sampler.gif', images)
 # ax.axis(True)
 # plt.savefig("figures/general_plots/rowNormVo.pdf", bbox_inches='tight')
 # plt.clf()
+
+######################################################################################
+
+# Plot line graphs
+cmap = cm.get_cmap('gray')
+maxblocks = 10
+eigs = -np.sort(-np.array([np.random.randint(50) for i in range(maxblocks)]))
+A = np.zeros((np.sum(eigs), np.sum(eigs)))
+start = 0
+stop = 0
+for i in range(len(eigs)):
+        stop = start+eigs[i]
+        random_mat = np.random.random((eigs[i], eigs[i]))
+        random_mat = (random_mat+random_mat.T) / 2
+        random_mat = random_mat > 0.8
+        A[start:stop][:, start:stop] = np.ones((eigs[i], eigs[i])) - random_mat
+        start = stop
+A1 = np.random.random(A.shape)
+A1 = A1>0.98
+A1 = (A1+A1.T) / 2
+A = A1+A
+A = A - np.eye(len(A))
+A = A > 0
+fig, ax = plt.subplots(figsize=(10,10))
+ax.axis(False)
+ax.imshow(A, cmap=cmap)
+# plt.show()
+plt.savefig("figures/general_plots/lineGraph.pdf", bbox_inches='tight')
